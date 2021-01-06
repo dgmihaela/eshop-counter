@@ -1,0 +1,7 @@
+@import "tailwindcss/base";
+@import "tailwindcss/components";
+@import "tailwindcss/utilities";
+
+.logo-image {
+    background-image: url('../assets/images/logo.png');
+}
