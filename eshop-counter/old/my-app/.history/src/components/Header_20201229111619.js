@@ -1,0 +1,23 @@
+import React from 'react';
+
+const Header = () => {
+
+    return(
+      <div>
+          <div className="logo inline-block">
+              <img alt="logo-mage" />
+              <span className="logoText">Ela's Kitchen</span>
+          </div>
+          <div className="inline-block">
+              <span>Hello Ela</span>
+              <span>Logout</span>
+              <div>
+              <img className="shopCart" alt="shopCart" />
+          </div>
+          </div>
+          
+      </div>  	
+    )
+}
+
+export default Header;

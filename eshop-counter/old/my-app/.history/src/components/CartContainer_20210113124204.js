@@ -1,0 +1,128 @@
+import React, {useState, useEffect} from 'react'
+import {useSelector, useDispatch} from 'react-redux';
+import axios from "axios";
+import Counter from './Counter';
+import { setQuantity } from '../slices/counterSlice';
+import { useForm } from "react-hook-form";
+
+import { yupResolver } from '@hookform/resolvers/yup';
+import * as yup from "yup";
+
+
+const Schema  = yup.object().shape({
+    username: yup
+      .string()
+      .required('Username is required')
+      .min(3, 'Min char is 3')
+      .max(6, 'Max char is 20'),
+    age: yup.number().required('Age is required'),
+    remember: yup.boolean().required()
+  });
+
+
+const CartContainer = () => {
+
+    const [cartProducts, setCartProducts] = useState([]);
+    const { productWithQuantity } = useSelector((state) => state).counterSlice;
+    const dispatch = useDispatch();
+
+
+
+
+    const { handleSubmit, register, reset, watch, errors } = useForm({ resolver: yupResolver(Schema) });
+
+    const watchShowAge = watch('showAge');
+    const watchAllFields = watch();
+    const watchFields = watch(['showAge', 'number']);
+
+    function onSubmit(formData) {
+      console.log(formData);
+    }
+  
+    console.log(watchAllFields)
+    console.log(watchFields)
+
+
+
+
+    useEffect(() => {
+        const fetchData = async() => {
+            
+            const result = await axios.get(`http://localhost:9000/cart`)
+            console.log('result data: ', result.data);
+            setCartProducts(result.data)
+            for(let prod of result.data){
+                dispatch(setQuantity({ productId: prod.id, quantity: result.data.quantity }));
+            }
+            
+
+        }
+        fetchData();
+    }, []);
+
+    const productsinCart = cartProducts.map((prod,i) => {
+        if(prod.quantity > 0){
+            return(
+                <tr key={i}>
+                    <td >{prod.title}</td>
+                    <td>
+                        <div>
+                        <Counter product={prod} />
+                        </div>
+                        
+                    </td>
+                    <td>{prod.initialPrice * parseInt(productWithQuantity[prod.id])}
+                    </td>
+
+                    
+                </tr>
+            )
+        }
+    })
+
+
+    return(
+        <div>
+            <table className="table-fixed">
+                <thead>
+                    <tr>
+                    <th className="w-1/2 ...">Product</th>
+                    <th className="w-1/4 ...">Quantity</th>
+                    <th className="w-1/4 ...">Price</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    { productsinCart}
+                    <tr></tr>
+                </tbody>
+                </table>
+                <div>
+                    <h1>react-hook-form</h1>
+                    <form autoComplete="off" onSubmit={handleSubmit(onSubmit)} onReset={reset}>
+                        <div>
+                            <label>Username</label>
+                            <input type="text" name="username" ref={register({required: true, maxLength: 20, minLength: 6})} />
+                            {errors.username && <p>{errors.username.message}</p>}
+                        </div>
+                        <div>
+                            <label>Show age</label>
+                            <input type="checkbox" name="showAge" ref={register} />
+                           {watchShowAge && (
+                               <>
+                                     <label>Age</label>
+                                    <input type="number" name="age" ref={register} />
+                                    {errors.age && <p>{errors.age.message}</p>}
+                               </>
+                           )}
+                        </div>
+                        
+                       
+
+                        <button type="submit">Submit</button>
+                    </form>
+                </div>
+        </div>
+    )
+}
+
+export default CartContainer;
